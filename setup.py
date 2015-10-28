@@ -1,3 +1,5 @@
+#convert py2exe
+
 from distutils.core import setup
 import py2exe
-setup(console=['selena.py'])
+setup(console=['YCBD.py'])
