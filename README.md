@@ -6,3 +6,4 @@ Run script before beginning browsing, copy any Youtube video's link you want to 
 Requirements :
 - Selenium
 - Mozilla Firefox
+- Python 2.7
