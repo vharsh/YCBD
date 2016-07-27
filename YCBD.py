@@ -1,38 +1,53 @@
-from selenium import webdriver
-import time
-import win32clipboard
-a=[]
-while(True):    
-    #GET Clipboard data
-    try:
-        win32clipboard.OpenClipboard()
-        data = win32clipboard.GetClipboardData()
-        win32clipboard.CloseClipboard()
-    except:
-        print("Error with clipboard")
-    if 'youtube' in data:
-        if data in a:
-            print("Already downloaded")
-            continue
-        a.append(data)
-        print (data)
-        baseurl = "http://www.clipconverter.cc/"
-
-        xpaths = { 'mediaurlBox' : "//input[@name='mediaurl']",
-                       'passwordTxtBox' : "//input[@name='password']",
-                       'submitButton' :   "//input[@name='submiturl']"
-                     }
+import clipboard
+import os
+import subprocess
+from multiprocessing import Process
+from concurrent.futures import ThreadPoolExecutor, Future
+from time import sleep
+pool = ThreadPoolExecutor(max_workers=2)
+os.chdir('C:/Downloads')
+links = []
+response = -1
+def enlist():
+    global links
+    link = ''
+    prev = ''
+    while(True):
         try:
-            NEXT_BUTTON_XPATH = '//input[@class="button ui-button ui-widget ui-state-default ui-corner-all" and @value="Start!"]'
-            mydriver = webdriver.Firefox()
-            mydriver.get(baseurl)
-            mydriver.maximize_window()
-            mydriver.find_element_by_xpath(xpaths['mediaurlBox']).send_keys(data)
-            mydriver.find_element_by_css_selector('.button.ui-button.ui-widget.ui-state-default.ui-corner-all').click()
-            time.sleep(10)
-            mydriver.find_element_by_xpath(NEXT_BUTTON_XPATH).click()
-            time.sleep(60)
-            mydriver.find_element_by_id('downloadbutton').click()
-            time.sleep(30)
+            link = clipboard.paste()
+            
+            if prev == link:
+                pass
+            else:
+                print(prev)
+                prev = link
+                if 'youtube' in prev:
+                    links.append(prev)
+                    sleep(5)
         except:
-            print("Trying again")
+            print("damned")
+
+def download():
+    global links
+    global response
+    done = []
+    i = 0
+    try:
+        while(True):
+            if i+1 <= len(links):
+                to_download = links[i]
+                com = 'youtube-dl ' + to_download
+                response = subprocess.call(com)
+                if response == 0:
+                    done.append(to_download)
+                    i += 1
+                    sleep(5)
+    except:
+        print("damned")
+
+'''p1 = Process(target = enlist())
+p1.start()
+p2 = Process(target = download())
+p2.start()'''
+pool.submit(enlist)
+pool.submit(download)
